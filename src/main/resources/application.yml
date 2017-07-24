@@ -1,0 +1,36 @@
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/gm
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.jdbc.Driver
+
+    #JPA Configuration:
+  jpa:
+    database: MYSQL
+    show-sql: true
+    generate-ddl: true
+
+    hibernate:
+    # Hibernate ddl auto (create, create-drop, update)
+      ddl-auto: update
+        #spring.jpa.database=org.hibernate.dialect.MySQL5InnoDBDialect
+      dialect: org.hibernate.dialect.MySQLDialect
+  thymeleaf:
+    prefix: classpath:/template/
+    suffix: .html
+    cache: false
+
+        #spring.resources.static-locations=classpath:/resources/,classpath:/static/
+confcorpid: wx3a42b774b7b91ccf
+conf:
+  corp:
+    id: wx3a42b774b7b91ccf
+    secret: tpfikag8WOgdhafho3-cEgqJVQwTN3daf-u9182mUbVT4H-uHsTqYUye7uk6Acnr
+  url:
+    gettoken: https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=wxac0c7f608dd7b462&corpsecret=94vG_nM3VE1HM0iACx9_fxOLFuapDyGjZJKjyB5jrpviDQTr0LSUYY_28IaOppel
+    upload: https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token=ACCESS_TOKEN&type=TYPE
+    gmtoken: http://localhost:8080/oauth/token?grant_type=password&client_id=appclient&client_secret=123456&username=USERNAME&password=PASSWORD
+logging:
+  level: trace
