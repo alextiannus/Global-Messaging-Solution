@@ -5,16 +5,25 @@ package com.wormwood.controller;
  */
 
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
+@RequestMapping("/wechat")
 public class WeChatController {
 
 
+    @RequestMapping("/sendMsgPage")
+    public String toProjectList() {
+        return "wechat/sendMsgPage";
+    }
 
-    @RequestMapping("/send/news")
-    public @ResponseBody String sendWechat() throws Exception {
+
+    @RequestMapping("/sendMsgOut")
+    public @ResponseBody String sendWechat(String msgTextarea) throws Exception {
+        System.out.println("========sgTextarea: " + msgTextarea);
+
         /*String accessToken = UrlUtil.getAccessToken();
         MpNewsMsg msg = new MpNewsMsg();
 

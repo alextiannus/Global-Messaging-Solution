@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html layout:decorator="layout/layout">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <title>Send WeChat Message</title>
+</head>
+
+<body class="nav-md">
+<div layout:fragment="content">
+
+    <div class="right_col" role="main">
+        <div class="row">
+
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="x_panel">
+                    <div class="x_title row">
+                        <h2>Staff List</h2>
+                        <div class="clearfix"></div>
+                    </div>
+
+                    <div class="x_content">
+                        <form action="/wechat/sendMsgOut" type="POST">
+                            <textarea id="msgTextarea" name="msgTextarea">
+                            </textarea>
+
+                            <button type="submit" class="btn btn-success" id="btnsubmit">Submit
+                            </button>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>
