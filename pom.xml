@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.dev</groupId>
-    <artifactId>gm</artifactId>
+    <artifactId>gms</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <parent>
@@ -131,6 +131,13 @@
             <artifactId>spring-cloud-starter-feign</artifactId>
             <version>1.3.0.M1</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.3.1</version>
+        </dependency>
+
     </dependencies>
     <!-- Package as an executable JAR -->
     <build>
