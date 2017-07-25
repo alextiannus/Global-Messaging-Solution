@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Wormwood Project Management</title>
+
+    <link th:href="@{/vendors/bootstrap/dist/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link th:href="@{/vendors/font-awesome/css/font-awesome.min.css}" rel="stylesheet"/>
+    <link th:href="@{/css/custom.min.css}" rel="stylesheet"/>
+    <link th:href="@{/css/dialog/bootstrap-dialog.min.css}" rel="stylesheet"/>
+    <link th:href="@{/vendors/pnotify/dist/pnotify.css}" rel="stylesheet"/>
+    <link th:href="@{/vendors/pnotify/dist/pnotify.buttons.css}" rel="stylesheet"/>
+    <link th:href="@{/vendors/pnotify/dist/pnotify.nonblock.css}" rel="stylesheet"/>
+
+    <script th:src="@{/vendors/jquery/dist/jquery.min.js}"></script>
+    <script th:src="@{/vendors/bootstrap/dist/js/bootstrap.min.js}"></script>
+    <script th:src="@{/js/dialog/bootstrap-dialog.js}"></script>
+    <script th:src="@{/vendors/pnotify/dist/pnotify.js}"></script>
+    <script th:src="@{/vendors/pnotify/dist/pnotify.buttons.js}"></script>
+    <script th:src="@{/vendors/pnotify/dist/pnotify.nonblock.js}"></script>
+    <script th:src="@{/js/commonJS.js}"></script>
+
+
+</head>
+
+<body class="nav-md">
+<div class="container body">
+    <div class="main_container">
+        <div th:replace="layout/leftMenu :: leftMenu"></div>
+        <div th:replace="layout/top :: top"></div>
+        <div layout:fragment="content"></div>
+        <div th:replace="layout/footer :: footer"></div>
+    </div>
+</div>
+
+<!-- Custom Theme Scripts -->
+<script th:src="@{/js/custom.min.js}"></script>
+</body>
+</html>

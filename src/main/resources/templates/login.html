@@ -1,0 +1,121 @@
+<!--<%@ page contentType="text/html;charset=UTF-8" language="java" %>-->
+<!--<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>-->
+  <!-- Meta, title, CSS, favicons, etc. -->
+  <!--<meta charset="gbk-2312"/>-->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+  <title>Wormwood SSO</title>
+
+  <!-- Bootstrap -->
+  <link type="text/css" href="/vendors/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <!-- Font Awesome -->
+  <link type="text/css" href="/vendors/font-awesome/css/font-awesome.min.css" rel="stylesheet"/>
+  <!-- NProgress -->
+  <link type="text/css" href="/vendors/nprogress/nprogress.css" rel="stylesheet"/>
+  <!-- Animate.css -->
+  <link type="text/css" href="/css/animate.min.css" rel="stylesheet"/>
+
+  <!-- Custom Theme Style -->
+  <link type="text/css" href="/css/custom.min.css" rel="stylesheet"/>
+</head>
+
+<body class="login">
+<div>
+  <a class="hiddenanchor" id="signup"></a>
+  <a class="hiddenanchor" id="signin"></a>
+
+  <div class="login_wrapper">
+    <div class="animate form login_form">
+
+      <!--<c:if test="${param.error != null}">-->
+        <!--<p>-->
+          <!--Invalid username and password.-->
+        <!--</p>-->
+      <!--</c:if>-->
+      <!--<c:if test="${param.logout != null}">-->
+        <!--<p>-->
+          <!--You have been logged out.-->
+        <!--</p>-->
+      <!--</c:if>-->
+      <section class="login_content">
+        <!--<c:url var="loginUrl" value="/login" />-->
+        <form action="/login" method="post">
+          <h1>Login Form</h1>
+          <div>
+              <input type="text" name="ssoId" class="form-control" style="height:30px" placeholder="Username"
+                     required=""/>
+          </div>
+          <div>
+              <input type="password" name="ssoPassword" class="form-control" style="height:30px" placeholder="Password"
+                     required=""/>
+          </div>
+          <div>
+            <input class="btn btn-default" type="submit" value="Log in"/>
+            <a class="reset_pass" href="#">Lost your password?</a>
+          </div>
+
+          <div class="clearfix"></div>
+
+          <div class="separator">
+            <p class="change_link">New to site?
+              <a href="#signup" class="to_register"> Create Account </a>
+            </p>
+
+            <div class="clearfix"></div>
+            <br />
+
+            <div>
+              <!--<h1><i class="fa fa-paw"></i> Wormwood </h1>-->
+              <h1> <img src="/images/icon2.png" width="34px"/> Wormwood </h1>
+              <p>?2016 All Rights Reserved. Wormwood Pte Ltd</p>
+            </div>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <div id="register" class="animate form registration_form">
+      <section class="login_content">
+        <form>
+          <h1>Create Account</h1>
+          <div>
+            <input type="text" class="form-control" placeholder="Username" required="" />
+          </div>
+          <div>
+            <input type="email" class="form-control" placeholder="Email" required="" />
+          </div>
+          <div>
+            <input type="password" class="form-control" placeholder="Password" required="" />
+          </div>
+          <div>
+            <a class="btn btn-default submit" href="index.html">Submit</a>
+          </div>
+
+          <div class="clearfix"></div>
+
+          <div class="separator">
+            <p class="change_link">Already a member ?
+              <a href="#signin" class="to_register"> Log in </a>
+            </p>
+
+            <div class="clearfix"></div>
+            <br />
+
+            <div>
+                <h1><i class="fa fa-paw"></i> Wormwood Team!</h1>
+                <p>@Wormwood PTE Ltd.</p>
+            </div>
+          </div>
+
+        </form>
+      </section>
+    </div>
+  </div>
+</div>
+</body>
+</html>
