@@ -156,4 +156,44 @@ public class WeChatController {
         return null;
     }
 
+    @RequestMapping("/sendFileMessage")
+    public @ResponseBody
+    String sendFileMessage(@RequestParam(value = "file", required = false) MultipartFile file, String departmentName, HttpServletRequest request) throws Exception {
+        System.out.println("corpid:  " + corpid + ", corpsecret: " + corpsecret + ", wechatClient: " + wechatClient);
+
+        String filenameame = file.getOriginalFilename();
+        String path = request.getSession().getServletContext().getRealPath("upload");
+
+        System.out.println("MultipartFile: " + file.getBytes().length + ", fileName: " + filenameame + ", path: " + path);
+        File tempFile = new File(path);
+        System.out.println("MultipartFile: " + tempFile.exists() );
+
+        String accessToken = UrlUtil.getAccessToken();
+        System.out.println("accessToken:" + accessToken);
+
+        String media_id = UrlUtil.uploadFileBytes(filenameame, file.getBytes(),  accessToken, "image");
+
+        String imageUrl = "https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token=" + accessToken + "&type=image";
+        Map<String, Object> messageMap = new HashMap<String, Object>();
+        messageMap.put("touser", null);
+        messageMap.put("toparty", 1);
+        messageMap.put("totag", null);
+        messageMap.put("msgtype", "file");
+        messageMap.put("agentid", 0);
+        messageMap.put("safe", 0);
+
+        Map<String, String> imageMap = new HashMap<String, String>();
+        imageMap.put("media_id", media_id);
+        messageMap.put("file", imageMap);
+
+        String mesgContent = GsonUtil.getInstance().toJson(messageMap);
+        System.out.println("mesgContent: " + mesgContent);
+
+        String textMessageUrl = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + accessToken;
+        String returnMsg = UrlUtil.urlPost(textMessageUrl, mesgContent);
+        System.out.println("returnMsg: " + returnMsg);
+
+        return null;
+    }
+
 }
