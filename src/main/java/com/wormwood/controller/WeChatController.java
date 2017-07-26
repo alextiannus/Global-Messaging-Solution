@@ -24,8 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -192,7 +190,7 @@ public class WeChatController {
         messageMap.put("safe", 0);
 
         //  articles start
-        List<Map<String, String>> articleList= Lists.newArrayList();
+        List<Map<String, String>> articleList = Lists.newArrayList();
 
         Map<String, String> newsItem_01 = Maps.newHashMap();
         newsItem_01.put("title", "程序员五大搞笑瞬间，你中了几枪？");
@@ -222,7 +220,7 @@ public class WeChatController {
         newsItem_04.put("picurl", "http://p3.pstatp.com/list/190x124/2c6e001daca270d3ed20");
         articleList.add(newsItem_04);
 
-        Map<String, List<Map<String, String>>> articles =Maps.newHashMap();
+        Map<String, List<Map<String, String>>> articles = Maps.newHashMap();
         articles.put("articles", articleList);
 
         //  articles end
@@ -259,7 +257,7 @@ public class WeChatController {
         System.out.println("sendMpnewsMessage media_id:  " + media_id);
 
         //  articles start
-        List<Map<String, String>> articleList= Lists.newArrayList();
+        List<Map<String, String>> articleList = Lists.newArrayList();
 
         Map<String, String> newsItem_01 = Maps.newHashMap();
         newsItem_01.put("title", "Mpnews Test");
@@ -272,7 +270,7 @@ public class WeChatController {
 
         articleList.add(newsItem_01);
 
-        Map<String, List<Map<String, String>>> articles =Maps.newHashMap();
+        Map<String, List<Map<String, String>>> articles = Maps.newHashMap();
         articles.put("articles", articleList);
 
         //  articles end
