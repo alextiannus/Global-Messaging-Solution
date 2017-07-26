@@ -14,6 +14,8 @@ import com.wormwood.util.GsonUtil;
 import com.wormwood.util.UrlUtil;
 import com.wormwood.vo.WechatToken;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -30,6 +32,8 @@ import java.util.Map;
 @Controller
 @RequestMapping("/wechat")
 public class WeChatController {
+
+    private static Logger logger = LoggerFactory.getLogger(WeChatController.class);
 
     @Value("${conf.corp.id}")
     private String corpid;
@@ -48,15 +52,15 @@ public class WeChatController {
     @RequestMapping("/sendTextMessage")
     public @ResponseBody
     String sendTextMessage(String departmentName, String msgTextarea) throws Exception {
-        System.out.println("sendTextMessage corpid:  " + corpid + ", corpsecret: " + corpsecret + ", wechatClient: " + wechatClient);
-        System.out.println("sendTextMessage departmentName: " + departmentName + ", sgTextarea: " + msgTextarea);
+        logger.info("sendTextMessage corpid:  " + corpid + ", corpsecret: " + corpsecret + ", wechatClient: " + wechatClient);
+        logger.info("sendTextMessage departmentName: " + departmentName + ", sgTextarea: " + msgTextarea);
 
         WechatToken wechatToken = wechatClient.getToken(corpid, corpsecret);
-        System.out.println("sendTextMessage wechatToken:" + wechatToken.getAccess_token() + ",   " + wechatToken.getExpires_in());
+        logger.info("sendTextMessage wechatToken:" + wechatToken.getAccess_token() + ",   " + wechatToken.getExpires_in());
 
 
         String accessToken = UrlUtil.getAccessToken();
-        System.out.println("sendTextMessage accessToken:" + accessToken);
+        logger.info("sendTextMessage accessToken:" + accessToken);
 
         TextMessage textMessage = new TextMessage();
         textMessage.setTouser(null);
@@ -68,21 +72,21 @@ public class WeChatController {
 
         String getDepartList = "https://qyapi.weixin.qq.com/cgi-bin/department/list?access_token=" + accessToken;
         String departList = UrlUtil.urlPost(getDepartList, "");
-        System.out.println("sendTextMessage departList: " + departList);
+        logger.info("sendTextMessage departList: " + departList);
         if (StringUtils.isNotBlank(departList)) {
             DepartmentMsg departmentMsg = GsonUtil.getInstance().fromJson(departList, DepartmentMsg.class);
             if (departmentMsg != null) {
                 List<DepartmentDetail> department = departmentMsg.getDepartment();
                 for (DepartmentDetail item : department) {
-                    System.out.println("id=" + item.getId() + ", name: " + item.getName());
+                    logger.info("id=" + item.getId() + ", name: " + item.getName());
                     if (departmentName.equalsIgnoreCase(item.getName())) {
                         textMessage.setToparty(item.getId() + "");
                         String mesgContent = GsonUtil.getInstance().toJson(textMessage);
-                        System.out.println("sendTextMessage mesgContent: " + mesgContent);
+                        logger.info("sendTextMessage mesgContent: " + mesgContent);
 
                         String textMessageUrl = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + accessToken;
                         String returnMsg = UrlUtil.urlPost(textMessageUrl, mesgContent);
-                        System.out.println("sendTextMessage returnMsg: " + returnMsg);
+                        logger.info("sendTextMessage returnMsg: " + returnMsg);
                     }
                 }
             }
@@ -94,17 +98,17 @@ public class WeChatController {
     @RequestMapping("/sendImageMessage")
     public @ResponseBody
     String sendImageMessage(@RequestParam(value = "file", required = false) MultipartFile file, String departmentName, HttpServletRequest request) throws Exception {
-        System.out.println("corpid:  " + corpid + ", corpsecret: " + corpsecret + ", wechatClient: " + wechatClient);
+        logger.info("corpid:  " + corpid + ", corpsecret: " + corpsecret + ", wechatClient: " + wechatClient);
 
         String filenameame = file.getOriginalFilename();
         String path = request.getSession().getServletContext().getRealPath("upload");
 
-        System.out.println("MultipartFile: " + file.getBytes().length + ", fileName: " + filenameame + ", path: " + path);
+        logger.info("MultipartFile: " + file.getBytes().length + ", fileName: " + filenameame + ", path: " + path);
         File tempFile = new File(path);
-        System.out.println("MultipartFile: " + tempFile.exists());
+        logger.info("MultipartFile: " + tempFile.exists());
 
         String accessToken = UrlUtil.getAccessToken();
-        System.out.println("accessToken:" + accessToken);
+        logger.info("accessToken:" + accessToken);
 
         String media_id = UrlUtil.uploadFileBytes(filenameame, file.getBytes(), accessToken, "image");
 
@@ -122,11 +126,11 @@ public class WeChatController {
         messageMap.put("image", imageMap);
 
         String mesgContent = GsonUtil.getInstance().toJson(messageMap);
-        System.out.println("mesgContent: " + mesgContent);
+        logger.info("mesgContent: " + mesgContent);
 
         String textMessageUrl = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + accessToken;
         String returnMsg = UrlUtil.urlPost(textMessageUrl, mesgContent);
-        System.out.println("returnMsg: " + returnMsg);
+        logger.info("returnMsg: " + returnMsg);
 
         return null;
     }
@@ -134,17 +138,17 @@ public class WeChatController {
     @RequestMapping("/sendFileMessage")
     public @ResponseBody
     String sendFileMessage(@RequestParam(value = "file", required = false) MultipartFile file, String departmentName, HttpServletRequest request) throws Exception {
-        System.out.println("corpid:  " + corpid + ", corpsecret: " + corpsecret + ", wechatClient: " + wechatClient);
+        logger.info("corpid:  " + corpid + ", corpsecret: " + corpsecret + ", wechatClient: " + wechatClient);
 
         String filenameame = file.getOriginalFilename();
         String path = request.getSession().getServletContext().getRealPath("upload");
 
-        System.out.println("sendFileMessage MultipartFile: " + file.getBytes().length + ", fileName: " + filenameame + ", path: " + path);
+        logger.info("sendFileMessage MultipartFile: " + file.getBytes().length + ", fileName: " + filenameame + ", path: " + path);
         File tempFile = new File(path);
-        System.out.println("sendFileMessage MultipartFile: " + tempFile.exists());
+        logger.info("sendFileMessage MultipartFile: " + tempFile.exists());
 
         String accessToken = UrlUtil.getAccessToken();
-        System.out.println("sendFileMessage accessToken:" + accessToken);
+        logger.info("sendFileMessage accessToken:" + accessToken);
 
         String media_id = UrlUtil.uploadFileBytes(filenameame, file.getBytes(), accessToken, "image");
 
@@ -162,11 +166,11 @@ public class WeChatController {
         messageMap.put("file", imageMap);
 
         String mesgContent = GsonUtil.getInstance().toJson(messageMap);
-        System.out.println("sendFileMessage mesgContent: " + mesgContent);
+        logger.info("sendFileMessage mesgContent: " + mesgContent);
 
         String textMessageUrl = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + accessToken;
         String returnMsg = UrlUtil.urlPost(textMessageUrl, mesgContent);
-        System.out.println("sendFileMessage returnMsg: " + returnMsg);
+        logger.info("sendFileMessage returnMsg: " + returnMsg);
 
         return null;
     }
@@ -175,9 +179,9 @@ public class WeChatController {
     public @ResponseBody
     String sendNewsMessage(String departmentName) throws Exception {
 
-        System.out.println("sendNewsMessage corpid:  " + corpid + ", corpsecret: " + corpsecret + ", wechatClient: " + wechatClient);
+        logger.info("sendNewsMessage corpid:  " + corpid + ", corpsecret: " + corpsecret + ", wechatClient: " + wechatClient);
         String accessToken = UrlUtil.getAccessToken();
-        System.out.println("accessToken:" + accessToken);
+        logger.info("accessToken:" + accessToken);
 
 
         String imageUrl = "https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token=" + accessToken + "&type=image";
@@ -228,11 +232,11 @@ public class WeChatController {
         messageMap.put("news", articles);
 
         String mesgContent = GsonUtil.getInstance().toJson(messageMap);
-        System.out.println("sendNewsMessage  mesgContent: " + mesgContent);
+        logger.info("sendNewsMessage  mesgContent: " + mesgContent);
 
         String textMessageUrl = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + accessToken;
         String returnMsg = UrlUtil.urlPost(textMessageUrl, mesgContent);
-        System.out.println("sendNewsMessage  returnMsg: " + returnMsg);
+        logger.info("sendNewsMessage  returnMsg: " + returnMsg);
 
         return null;
     }
@@ -241,20 +245,20 @@ public class WeChatController {
     @RequestMapping("/sendMpnewsMessage")
     public @ResponseBody
     String sendMpnewsMessage(@RequestParam(value = "file", required = false) MultipartFile file, String departmentName, HttpServletRequest request) throws Exception {
-        System.out.println("sendMpnewsMessage corpid:  " + corpid + ", corpsecret: " + corpsecret + ", wechatClient: " + wechatClient);
+        logger.info("sendMpnewsMessage corpid:  " + corpid + ", corpsecret: " + corpsecret + ", wechatClient: " + wechatClient);
 
         String filenameame = file.getOriginalFilename();
         String path = request.getSession().getServletContext().getRealPath("upload");
 
-        System.out.println("sendMpnewsMessage MultipartFile: " + file.getBytes().length + ", fileName: " + filenameame + ", path: " + path);
+        logger.info("sendMpnewsMessage MultipartFile: " + file.getBytes().length + ", fileName: " + filenameame + ", path: " + path);
         File tempFile = new File(path);
-        System.out.println("sendMpnewsMessage MultipartFile: " + tempFile.exists());
+        logger.info("sendMpnewsMessage MultipartFile: " + tempFile.exists());
 
         String accessToken = UrlUtil.getAccessToken();
-        System.out.println("sendMpnewsMessage accessToken:" + accessToken);
+        logger.info("sendMpnewsMessage accessToken:" + accessToken);
 
         String media_id = UrlUtil.uploadFileBytes(filenameame, file.getBytes(), accessToken, "image");
-        System.out.println("sendMpnewsMessage media_id:  " + media_id);
+        logger.info("sendMpnewsMessage media_id:  " + media_id);
 
         //  articles start
         List<Map<String, String>> articleList = Lists.newArrayList();
@@ -284,11 +288,11 @@ public class WeChatController {
         messageMap.put("mpnews", articles);
 
         String mesgContent = GsonUtil.getInstance().toJson(messageMap);
-        System.out.println("sendMpnewsMessage  mesgContent: " + mesgContent);
+        logger.info("sendMpnewsMessage  mesgContent: " + mesgContent);
 
         String textMessageUrl = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + accessToken;
         String returnMsg = UrlUtil.urlPost(textMessageUrl, mesgContent);
-        System.out.println("sendMpnewsMessage  returnMsg: " + returnMsg);
+        logger.info("sendMpnewsMessage  returnMsg: " + returnMsg);
 
         return null;
     }
