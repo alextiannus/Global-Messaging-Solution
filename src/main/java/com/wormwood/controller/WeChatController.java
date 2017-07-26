@@ -4,6 +4,8 @@ package com.wormwood.controller;
  * Created by Donnie on 2017/2/17.
  */
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.wormwood.DTO.DepartmentDetail;
 import com.wormwood.DTO.DepartmentMsg;
 import com.wormwood.DTO.TextMessage;
@@ -22,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,28 +49,28 @@ public class WeChatController {
 
     @RequestMapping("/sendTextMessage")
     public @ResponseBody
-    String sendWechat(String departmentName, String msgTextarea) throws Exception {
-        System.out.println("corpid:  " + corpid + ", corpsecret: " + corpsecret + ", wechatClient: " + wechatClient);
-        System.out.println("departmentName: " + departmentName + ", sgTextarea: " + msgTextarea);
+    String sendTextMessage(String departmentName, String msgTextarea) throws Exception {
+        System.out.println("sendTextMessage corpid:  " + corpid + ", corpsecret: " + corpsecret + ", wechatClient: " + wechatClient);
+        System.out.println("sendTextMessage departmentName: " + departmentName + ", sgTextarea: " + msgTextarea);
 
         WechatToken wechatToken = wechatClient.getToken(corpid, corpsecret);
-        System.out.println("wechatToken:" + wechatToken);
+        System.out.println("sendTextMessage wechatToken:" + wechatToken);
 
 
         String accessToken = UrlUtil.getAccessToken();
-        System.out.println("accessToken:" + accessToken);
+        System.out.println("sendTextMessage accessToken:" + accessToken);
 
         TextMessage textMessage = new TextMessage();
         textMessage.setTouser(null);
         textMessage.setTotag(null);
         textMessage.setAgentid(0);
-        Map<String, String> textMap = new HashMap<String, String>();
+        Map<String, String> textMap = Maps.newHashMap();
         textMap.put("content", msgTextarea);
         textMessage.setText(textMap);
 
         String getDepartList = "https://qyapi.weixin.qq.com/cgi-bin/department/list?access_token=" + accessToken;
         String departList = UrlUtil.urlPost(getDepartList, "");
-        System.out.println("departList: " + departList);
+        System.out.println("sendTextMessage departList: " + departList);
         if (StringUtils.isNotBlank(departList)) {
             DepartmentMsg departmentMsg = GsonUtil.getInstance().fromJson(departList, DepartmentMsg.class);
             if (departmentMsg != null) {
@@ -77,41 +80,15 @@ public class WeChatController {
                     if (departmentName.equalsIgnoreCase(item.getName())) {
                         textMessage.setToparty(item.getId() + "");
                         String mesgContent = GsonUtil.getInstance().toJson(textMessage);
-                        System.out.println("mesgContent: " + mesgContent);
+                        System.out.println("sendTextMessage mesgContent: " + mesgContent);
 
                         String textMessageUrl = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + accessToken;
                         String returnMsg = UrlUtil.urlPost(textMessageUrl, mesgContent);
-                        System.out.println("returnMsg: " + returnMsg);
+                        System.out.println("sendTextMessage returnMsg: " + returnMsg);
                     }
                 }
             }
         }
-
-
-
-
-        /*MpNewsMsg msg = new MpNewsMsg();
-
-        Article article = new Article("2kfb8gad2m8Tv9KpPgmeZ60ND0nYSMOp0jZxmFvyAi_BMZo-ILfryiGQsIZKAzNq2","【外盘日讯】 特朗普演说反应正面 ：美联储3月加息机率暴增至66.4%");//
-        article.setContent(Constants.content);
-        article.setDigest("digest");
-        article.setShow_cover_pic(0);
-
-        MpNews mpNews = new MpNews();
-        List<Article> articleList = new ArrayList<Article>();
-        articleList.add(article);
-        mpNews.setArticles(articleList);
-
-        msg.setTouser("@all");
-        msg.setMsgtype("mpNews");
-        msg.setAgentid(0);
-        msg.setMpnews(mpNews);
-
-        String jsonContent = gsonHtml.toJson(msg);
-        String sendUrl = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + accessToken;
-        log.debug("--------------------------jsonMsg:{}", jsonContent);
-        return UrlUtil.urlPost(sendUrl, jsonContent);
-        */
 
         return null;
     }
@@ -126,15 +103,15 @@ public class WeChatController {
 
         System.out.println("MultipartFile: " + file.getBytes().length + ", fileName: " + filenameame + ", path: " + path);
         File tempFile = new File(path);
-        System.out.println("MultipartFile: " + tempFile.exists() );
+        System.out.println("MultipartFile: " + tempFile.exists());
 
         String accessToken = UrlUtil.getAccessToken();
         System.out.println("accessToken:" + accessToken);
 
-        String media_id = UrlUtil.uploadFileBytes(filenameame, file.getBytes(),  accessToken, "image");
+        String media_id = UrlUtil.uploadFileBytes(filenameame, file.getBytes(), accessToken, "image");
 
         String imageUrl = "https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token=" + accessToken + "&type=image";
-        Map<String, Object> messageMap = new HashMap<String, Object>();
+        Map<String, Object> messageMap = Maps.newHashMap();
         messageMap.put("touser", null);
         messageMap.put("toparty", 1);
         messageMap.put("totag", null);
@@ -142,7 +119,7 @@ public class WeChatController {
         messageMap.put("agentid", 0);
         messageMap.put("safe", 0);
 
-        Map<String, String> imageMap = new HashMap<String, String>();
+        Map<String, String> imageMap = Maps.newHashMap();
         imageMap.put("media_id", media_id);
         messageMap.put("image", imageMap);
 
@@ -164,17 +141,17 @@ public class WeChatController {
         String filenameame = file.getOriginalFilename();
         String path = request.getSession().getServletContext().getRealPath("upload");
 
-        System.out.println("MultipartFile: " + file.getBytes().length + ", fileName: " + filenameame + ", path: " + path);
+        System.out.println("sendFileMessage MultipartFile: " + file.getBytes().length + ", fileName: " + filenameame + ", path: " + path);
         File tempFile = new File(path);
-        System.out.println("MultipartFile: " + tempFile.exists() );
+        System.out.println("sendFileMessage MultipartFile: " + tempFile.exists());
 
         String accessToken = UrlUtil.getAccessToken();
-        System.out.println("accessToken:" + accessToken);
+        System.out.println("sendFileMessage accessToken:" + accessToken);
 
-        String media_id = UrlUtil.uploadFileBytes(filenameame, file.getBytes(),  accessToken, "image");
+        String media_id = UrlUtil.uploadFileBytes(filenameame, file.getBytes(), accessToken, "image");
 
         String imageUrl = "https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token=" + accessToken + "&type=image";
-        Map<String, Object> messageMap = new HashMap<String, Object>();
+        Map<String, Object> messageMap = Maps.newHashMap();
         messageMap.put("touser", null);
         messageMap.put("toparty", 1);
         messageMap.put("totag", null);
@@ -182,16 +159,68 @@ public class WeChatController {
         messageMap.put("agentid", 0);
         messageMap.put("safe", 0);
 
-        Map<String, String> imageMap = new HashMap<String, String>();
+        Map<String, String> imageMap = Maps.newHashMap();
         imageMap.put("media_id", media_id);
         messageMap.put("file", imageMap);
 
         String mesgContent = GsonUtil.getInstance().toJson(messageMap);
-        System.out.println("mesgContent: " + mesgContent);
+        System.out.println("sendFileMessage mesgContent: " + mesgContent);
 
         String textMessageUrl = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + accessToken;
         String returnMsg = UrlUtil.urlPost(textMessageUrl, mesgContent);
-        System.out.println("returnMsg: " + returnMsg);
+        System.out.println("sendFileMessage returnMsg: " + returnMsg);
+
+        return null;
+    }
+
+    @RequestMapping("/sendNewsMessage")
+    public @ResponseBody
+    String sendNewsMessage(String departmentName) throws Exception {
+
+        System.out.println("sendNewsMessage corpid:  " + corpid + ", corpsecret: " + corpsecret + ", wechatClient: " + wechatClient);
+        String accessToken = UrlUtil.getAccessToken();
+        System.out.println("accessToken:" + accessToken);
+
+
+        String imageUrl = "https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token=" + accessToken + "&type=image";
+        Map<String, Object> messageMap = Maps.newHashMap();
+        messageMap.put("touser", null);
+        messageMap.put("toparty", 1);
+        messageMap.put("totag", null);
+        messageMap.put("msgtype", "news");
+        messageMap.put("agentid", 0);
+        messageMap.put("safe", 0);
+
+        //  articles start
+        List<Map<String, String>> articleList= Lists.newArrayList();
+
+        Map<String, String> newsItem_01 = Maps.newHashMap();
+        newsItem_01.put("title", "华为美国并购得与失");
+        newsItem_01.put("description", "good morning");
+        newsItem_01.put("url", "http://www.toutiao.com/group/6446536895971295502/");
+        newsItem_01.put("picurl", "http://p3.pstatp.com/list/190x124/2f930006686e9f0279d3");
+        articleList.add(newsItem_01);
+
+        Map<String, String> newsItem_02 = Maps.newHashMap();
+        newsItem_02.put("title", "国家出手！4G/宽带费用暴降玩真的");
+        newsItem_02.put("description", "Hellow World");
+        newsItem_02.put("url", "http://www.toutiao.com/group/6446628850491228429/");
+        newsItem_02.put("picurl", "http://p1.pstatp.com/list/190x124/30fc00002ea3f9cba941");
+        articleList.add(newsItem_02);
+
+        Map<String, List<Map<String, String>>> articles =Maps.newHashMap();
+        articles.put("articles", articleList);
+
+        //  articles end
+
+        messageMap.put("news", articles);
+
+        String mesgContent = GsonUtil.getInstance().toJson(messageMap);
+        System.out.println("sendNewsMessage  mesgContent: " + mesgContent);
+
+        String textMessageUrl = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + accessToken;
+        String returnMsg = UrlUtil.urlPost(textMessageUrl, mesgContent);
+        System.out.println("sendNewsMessage  returnMsg: " + returnMsg);
 
         return null;
     }
