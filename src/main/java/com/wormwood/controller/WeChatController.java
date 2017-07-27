@@ -1,15 +1,22 @@
 package com.wormwood.controller;
 
 /**
- * Created by Donnie on 2017/2/17.
+ * User: tangbin
+ * Date: 2017/7/25
+ * T me: 8:35
+ * Description: To change this template use File | Settings | File Templates.
  */
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.wormwood.DTO.DepartmentDetail;
 import com.wormwood.DTO.DepartmentMsg;
+import com.wormwood.DTO.GmsCorpDTO;
 import com.wormwood.DTO.TextMessage;
 import com.wormwood.client.WechatClient;
+import com.wormwood.response.Response;
+import com.wormwood.result.ResultEnum;
+import com.wormwood.service.WechatService;
 import com.wormwood.util.GsonUtil;
 import com.wormwood.util.UrlUtil;
 import com.wormwood.vo.WechatToken;
@@ -18,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,6 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -41,13 +50,44 @@ public class WeChatController {
     @Value("${conf.corp.secret}")
     private String corpsecret;
 
+    @Autowired
+    private WechatService wechatService;
+
     @RequestMapping("/sendMsgPage")
-    public String toProjectList() {
+    public String toSendMsgPage() {
+        logger.info("toSendMsgPage wechatService: " + wechatService.findByCorpid(corpid));
         return "wechat/sendMsgPage";
     }
 
     @Autowired
     private WechatClient wechatClient;
+
+    @RequestMapping("/updateCorpDetail")
+    public @ResponseBody
+    ResponseEntity updateCorpDetail(String corpid, String corpsecret, String agentid) throws Exception {
+        GmsCorpDTO dbData = wechatService.findByCorpid(corpid);
+        if (dbData == null) {
+            GmsCorpDTO newData = new GmsCorpDTO();
+            newData.setCorpid(corpid);
+            newData.setCorpsecret(corpsecret);
+            newData.setAgentid(agentid);
+            newData.setCrtBy("SYS");
+            newData.setCrtDate(new Date());
+            wechatService.insertNewCorp(newData);
+
+            return new Response(ResultEnum.INSERT_SUCCESS).build();
+            //  insert data
+        } else {
+            //
+            dbData.setCorpsecret(corpsecret);
+            dbData.setAgentid(agentid);
+            dbData.setUdpBy("SYS");
+            dbData.setUpdDate(new Date());
+            wechatService.updateCorp(dbData);
+
+            return new Response(ResultEnum.UPDATE_SUCCESS).build();
+        }
+    }
 
     @RequestMapping("/sendTextMessage")
     public @ResponseBody
