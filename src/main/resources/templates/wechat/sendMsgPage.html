@@ -59,17 +59,14 @@
                     <div class="x_content">
                         <form action="/wechat/sendTextMessage" type="POST">
                             <div class="col-md-6 col-sm-6 col-xs-12">
-                                <input type="text" id="departmentName" name="departmentName" required="required"
-                                       value=""
-                                       class="form-control col-md-7 col-xs-12"/>
+                                <input type="text" id="corpid" name="corpid" required="required"  value="" class="form-control col-md-7 col-xs-12"/>
+                                <input type="text" id="toparty" name="toparty" required="required"  value=""  class="form-control col-md-7 col-xs-12"/>
                             </div>
-                            <textarea id="msgTextarea" name="msgTextarea">
-                            </textarea>
-                            <button type="submit" class="btn btn-success" id="btnsubmit">Submit
-                            </button>
-
+                            <textarea id="content" name="content"> </textarea>
+                            <button type="submit" class="btn btn-success" id="btnsubmit">Submit </button>
                         </form>
                     </div>
+
                 </div>
             </div>
 
@@ -83,6 +80,9 @@
                     <div class="x_content">
                         <form action="/wechat/sendImageMessage" method="post" enctype="multipart/form-data">
                             <div class="col-md-6 col-sm-6 col-xs-12">
+                                <input type="text" id="corpid" name="corpid" required="required"
+                                       value=""
+                                       class="form-control col-md-7 col-xs-12"/>
                                 <input type="text" id="departmentName" name="departmentName" required="required"
                                        value=""
                                        class="form-control col-md-7 col-xs-12"/>
