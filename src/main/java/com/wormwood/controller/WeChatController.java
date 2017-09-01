@@ -10,10 +10,7 @@ package com.wormwood.controller;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
-import com.wormwood.DTO.DepartmentDetail;
-import com.wormwood.DTO.DepartmentMsg;
-import com.wormwood.DTO.GmsCorpDTO;
-import com.wormwood.DTO.TextMessage;
+import com.wormwood.DTO.*;
 import com.wormwood.client.WechatClient;
 import com.wormwood.response.Response;
 import com.wormwood.result.ResultEnum;
@@ -123,9 +120,9 @@ public class WeChatController {
             WechatToken wechatToken = wechatClient.getToken(corpid, dbCorpSecret);
             logger.info("sendTextMessage wechatToken:" + wechatToken.getAccess_token() + ",   " + wechatToken.getExpires_in());
 
-
-            String accessToken = UrlUtil.getAccessToken();
+            String accessToken = wechatToken.getAccess_token();
             logger.info("sendTextMessage accessToken:" + accessToken);
+
 
             TextMessage textMessage = new TextMessage();
             textMessage.setTouser(touser);
@@ -134,6 +131,8 @@ public class WeChatController {
             Map<String, String> textMap = Maps.newHashMap();
             textMap.put("content", content);
             textMessage.setText(textMap);
+
+            String getUserList = "https://qyapi.weixin.qq.com/cgi-bin/user/list?access_token=" + accessToken;
 
             String getDepartList = "https://qyapi.weixin.qq.com/cgi-bin/department/list?access_token=" + accessToken;
             String departList = UrlUtil.urlPost(getDepartList, "");
@@ -144,6 +143,19 @@ public class WeChatController {
                     List<DepartmentDetail> department = departmentMsg.getDepartment();
                     for (DepartmentDetail item : department) {
                         logger.info("id=" + item.getId() + ", name: " + item.getName());
+
+                        String getDepartmentUsers = getUserList + "&department_id=" + item.getId() + "&fetch_child=1&status=0";
+                        String departUserList = UrlUtil.urlPost(getDepartmentUsers, "");
+                        WechatUserMsg userMsg = GsonUtil.getInstance().fromJson(departUserList, WechatUserMsg.class);
+                        if(userMsg != null && userMsg.getErrcode() == 0 && userMsg.getUserlist() != null) {
+                            List<WechatUser> userList = userMsg.getUserlist();
+                            for(WechatUser depUser: userList) {
+                                String userId = depUser.getUserid();
+                                String userName = depUser.getName();
+                                logger.info("\tid=" + item.getId() + ", name: " + item.getName() + ", userId=" + userId + ", userName=" + userName);
+                            }
+                        }
+
                         if (toparty.equalsIgnoreCase(item.getName())) {
                             textMessage.setToparty(item.getId() + "");
                             String mesgContent = GsonUtil.getInstance().toJson(textMessage);
@@ -191,6 +203,8 @@ public class WeChatController {
         }
 
         try {
+            String dbCorpSecret = dbData.getCorpsecret();
+            int dbAgentId = dbData.getAgentid();
             logger.info("corpid:  " + corpid + ", corpsecret: " + corpsecret + ", wechatClient: " + wechatClient);
 
             String filenameame = image.getOriginalFilename();
@@ -200,13 +214,16 @@ public class WeChatController {
             File tempFile = new File(path);
             logger.info("MultipartFile: " + tempFile.exists());
 
-            String accessToken = UrlUtil.getAccessToken();
-            logger.info("accessToken:" + accessToken);
+            WechatToken wechatToken = wechatClient.getToken(corpid, dbCorpSecret);
+            logger.info("sendImageMessage wechatToken:" + wechatToken.getAccess_token() + ",   " + wechatToken.getExpires_in());
+
+            String accessToken = wechatToken.getAccess_token();
+            logger.info("sendImageMessage accessToken:" + accessToken);
 
             String media_id = UrlUtil.uploadFileBytes(filenameame, image.getBytes(), accessToken, "image");
             String getDepartList = "https://qyapi.weixin.qq.com/cgi-bin/department/list?access_token=" + accessToken;
             String departList = UrlUtil.urlPost(getDepartList, "");
-            logger.info("sendTextMessage departList: " + departList);
+            logger.info("sendImageMessage departList: " + departList);
             if (StringUtils.isNotBlank(departList)) {
                 DepartmentMsg departmentMsg = GsonUtil.getInstance().fromJson(departList, DepartmentMsg.class);
                 if (departmentMsg != null) {
@@ -254,6 +271,31 @@ public class WeChatController {
     public @ResponseBody
     String sendFileMessage(@RequestParam(value = "file", required = false) MultipartFile file, String departmentName, HttpServletRequest request) throws Exception {
         logger.info("corpid:  " + corpid + ", corpsecret: " + corpsecret + ", wechatClient: " + wechatClient);
+        Map<String, Object> returnMap = new HashMap<String, Object>();
+
+        GmsCorpDTO dbData = wechatService.findByCorpid(corpid);
+        if(dbData == null ) {
+            returnMap.put("success", false);
+            returnMap.put("code ", "1302 ");
+            returnMap.put("message ", "Can not find corpid[" + corpid + "] in our database , Please call updateCorpDetail!");
+            return new Gson().toJson(returnMap).toString();
+        }
+
+        if(dbData.getCorpsecret() == null) {
+            returnMap.put("success", false);
+            returnMap.put("code ", "1302 ");
+            returnMap.put("message ", " corpsecret for [" + corpid + "]  is null , Please call updateCorpDetail!");
+            return new Gson().toJson(returnMap).toString();
+        }
+        String dbCorpSecret = dbData.getCorpsecret();
+        int dbAgentId = dbData.getAgentid();
+        logger.info("corpid:  " + corpid + ", corpsecret: " + corpsecret + ", wechatClient: " + wechatClient);
+
+        WechatToken wechatToken = wechatClient.getToken(corpid, dbCorpSecret);
+        logger.info("sendFileMessage wechatToken:" + wechatToken.getAccess_token() + ",   " + wechatToken.getExpires_in());
+
+        String accessToken = wechatToken.getAccess_token();
+        logger.info("sendFileMessage accessToken:" + accessToken);
 
         String filenameame = file.getOriginalFilename();
         String path = request.getSession().getServletContext().getRealPath("upload");
@@ -262,8 +304,6 @@ public class WeChatController {
         File tempFile = new File(path);
         logger.info("sendFileMessage MultipartFile: " + tempFile.exists());
 
-        String accessToken = UrlUtil.getAccessToken();
-        logger.info("sendFileMessage accessToken:" + accessToken);
 
         String media_id = UrlUtil.uploadFileBytes(filenameame, file.getBytes(), accessToken, "image");
 
@@ -293,10 +333,31 @@ public class WeChatController {
     @RequestMapping("/sendNewsMessage")
     public @ResponseBody
     String sendNewsMessage(String departmentName) throws Exception {
+        Map<String, Object> returnMap = new HashMap<String, Object>();
 
-        logger.info("sendNewsMessage corpid:  " + corpid + ", corpsecret: " + corpsecret + ", wechatClient: " + wechatClient);
-        String accessToken = UrlUtil.getAccessToken();
-        logger.info("accessToken:" + accessToken);
+        GmsCorpDTO dbData = wechatService.findByCorpid(corpid);
+        if(dbData == null ) {
+            returnMap.put("success", false);
+            returnMap.put("code ", "1302 ");
+            returnMap.put("message ", "Can not find corpid[" + corpid + "] in our database , Please call updateCorpDetail!");
+            return new Gson().toJson(returnMap).toString();
+        }
+
+        if(dbData.getCorpsecret() == null) {
+            returnMap.put("success", false);
+            returnMap.put("code ", "1302 ");
+            returnMap.put("message ", " corpsecret for [" + corpid + "]  is null , Please call updateCorpDetail!");
+            return new Gson().toJson(returnMap).toString();
+        }
+        String dbCorpSecret = dbData.getCorpsecret();
+        int dbAgentId = dbData.getAgentid();
+        logger.info("corpid:  " + corpid + ", corpsecret: " + corpsecret + ", wechatClient: " + wechatClient);
+
+        WechatToken wechatToken = wechatClient.getToken(corpid, dbCorpSecret);
+        logger.info("sendNewsMessage wechatToken:" + wechatToken.getAccess_token() + ",   " + wechatToken.getExpires_in());
+
+        String accessToken = wechatToken.getAccess_token();
+        logger.info("sendNewsMessage accessToken:" + accessToken);
 
 
         String imageUrl = "https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token=" + accessToken + "&type=image";
@@ -361,6 +422,31 @@ public class WeChatController {
     public @ResponseBody
     String sendMpnewsMessage(@RequestParam(value = "file", required = false) MultipartFile file, String departmentName, HttpServletRequest request) throws Exception {
         logger.info("sendMpnewsMessage corpid:  " + corpid + ", corpsecret: " + corpsecret + ", wechatClient: " + wechatClient);
+        Map<String, Object> returnMap = new HashMap<String, Object>();
+
+        GmsCorpDTO dbData = wechatService.findByCorpid(corpid);
+        if(dbData == null ) {
+            returnMap.put("success", false);
+            returnMap.put("code ", "1302 ");
+            returnMap.put("message ", "Can not find corpid[" + corpid + "] in our database , Please call updateCorpDetail!");
+            return new Gson().toJson(returnMap).toString();
+        }
+
+        if(dbData.getCorpsecret() == null) {
+            returnMap.put("success", false);
+            returnMap.put("code ", "1302 ");
+            returnMap.put("message ", " corpsecret for [" + corpid + "]  is null , Please call updateCorpDetail!");
+            return new Gson().toJson(returnMap).toString();
+        }
+        String dbCorpSecret = dbData.getCorpsecret();
+        int dbAgentId = dbData.getAgentid();
+        logger.info("corpid:  " + corpid + ", corpsecret: " + corpsecret + ", wechatClient: " + wechatClient);
+
+        WechatToken wechatToken = wechatClient.getToken(corpid, dbCorpSecret);
+        logger.info("sendMpnewsMessage wechatToken:" + wechatToken.getAccess_token() + ",   " + wechatToken.getExpires_in());
+
+        String accessToken = wechatToken.getAccess_token();
+        logger.info("sendMpnewsMessage accessToken:" + accessToken);
 
         String filenameame = file.getOriginalFilename();
         String path = request.getSession().getServletContext().getRealPath("upload");
@@ -368,9 +454,6 @@ public class WeChatController {
         logger.info("sendMpnewsMessage MultipartFile: " + file.getBytes().length + ", fileName: " + filenameame + ", path: " + path);
         File tempFile = new File(path);
         logger.info("sendMpnewsMessage MultipartFile: " + tempFile.exists());
-
-        String accessToken = UrlUtil.getAccessToken();
-        logger.info("sendMpnewsMessage accessToken:" + accessToken);
 
         String media_id = UrlUtil.uploadFileBytes(filenameame, file.getBytes(), accessToken, "image");
         logger.info("sendMpnewsMessage media_id:  " + media_id);
