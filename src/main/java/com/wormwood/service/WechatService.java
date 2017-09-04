@@ -23,7 +23,7 @@ import java.util.Map;
  * T me: 8:35
  * Description: use wechat tables
  */
-@Service(value="wechatService")
+@Service(value = "wechatService")
 public class WechatService {
 
     private static Logger logger = LoggerFactory.getLogger(WechatService.class);
@@ -59,7 +59,6 @@ public class WechatService {
     public List<DepartmentDetail> getDepartmentList(String accessToken) {
         String getDepartList = "https://qyapi.weixin.qq.com/cgi-bin/department/list?access_token=" + accessToken;
         String departList = UrlUtil.urlPost(getDepartList, "");
-        logger.info("sendTextMessage departList: " + departList);
         if (StringUtils.isNotBlank(departList)) {
             DepartmentMsg departmentMsg = GsonUtil.getInstance().fromJson(departList, DepartmentMsg.class);
             if (departmentMsg != null) {
@@ -111,7 +110,7 @@ public class WechatService {
      */
     public List<WechatUser> getAllCorpUser(String accessToken) {
         if (accessToken == null) {
-            accessToken = getAccessToken();
+            accessToken = getAccessToken(corpid, corpsecret);
         }
 
         List<DepartmentDetail> departmentList = getDepartmentList(accessToken);
@@ -146,33 +145,30 @@ public class WechatService {
             helpMap.put(weixinId, Boolean.TRUE);
         }
 
-        for(WechatUser user:allCorpUser) {
+        for (WechatUser user : allCorpUser) {
             String weixinId = user.getWeixinid();
-            if(helpMap.get(weixinId) != null) {
+            if (helpMap.get(weixinId) != null) {
                 resultList.add(user);
             }
         }
         return null;
     }
 
-
-    public String getAccessToken() {
-        String url = "https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=" + corpid + "&corpsecret=" + corpsecret;
+    /**
+     * Get user accessToken
+     *
+     * @param inputCorpid
+     * @param inputCorpsecret
+     * @return
+     */
+    public String getAccessToken(String inputCorpid, String inputCorpsecret) {
+        String url = "https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=" + inputCorpid + "&corpsecret=" + inputCorpsecret;
         String tokenJsonStr = UrlUtil.urlGet(url);
         JsonObject jsonObject = GsonUtil.getInstance().fromJson(tokenJsonStr, JsonObject.class);
         if (jsonObject != null) {
             return jsonObject.get("access_token").getAsString();
         }
         return null;
-    }
-
-    public static void main(String args[]) {
-        try {
-            WechatService wechatService = new WechatService();
-            wechatService.getAllCorpUser(null);
-        } catch (Exception ex) {
-            ex.printStackTrace();;
-        }
     }
 
 }

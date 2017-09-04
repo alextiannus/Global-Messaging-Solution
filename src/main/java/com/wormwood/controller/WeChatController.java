@@ -96,14 +96,14 @@ public class WeChatController {
         Map<String, Object> returnMap = new HashMap<String, Object>();
 
         GmsCorpDTO dbData = wechatService.findByCorpid(corpid);
-        if(dbData == null ) {
+        if (dbData == null) {
             returnMap.put("success", false);
             returnMap.put("code ", "1102 ");
             returnMap.put("message ", "Can not find corpid[" + corpid + "] in our database , Please call updateCorpDetail!");
             return new Gson().toJson(returnMap).toString();
         }
 
-        if(dbData.getCorpsecret() == null) {
+        if (dbData.getCorpsecret() == null) {
             returnMap.put("success", false);
             returnMap.put("code ", "1102 ");
             returnMap.put("message ", " corpsecret for [" + corpid + "]  is null , Please call updateCorpDetail!");
@@ -114,15 +114,8 @@ public class WeChatController {
             String dbCorpSecret = dbData.getCorpsecret();
             int dbAgentId = dbData.getAgentid();
 
-            logger.info("sendTextMessage corpid:  " + corpid + ", dbCorpSecret: " + dbCorpSecret + ", dbAgentId: " +dbAgentId + ", wechatClient:" + wechatClient);
-            logger.info("sendTextMessage toparty: " + toparty + ", content: " + content + ", safe=" + safe);
-
-            WechatToken wechatToken = wechatClient.getToken(corpid, dbCorpSecret);
-            logger.info("sendTextMessage wechatToken:" + wechatToken.getAccess_token() + ",   " + wechatToken.getExpires_in());
-
-            String accessToken = wechatToken.getAccess_token();
-            logger.info("sendTextMessage accessToken:" + accessToken);
-
+            logger.info("sendTextMessage corpid:  " + corpid + ", dbCorpSecret: " + dbCorpSecret + ", dbAgentId: " + dbAgentId + ", wechatClient:" + wechatClient);
+            logger.info("sendTextMessage touser: " + touser + ", toparty: " + toparty + ", content: " + content + ", safe=" + safe);
 
             TextMessage textMessage = new TextMessage();
             textMessage.setTouser(touser);
@@ -132,40 +125,32 @@ public class WeChatController {
             textMap.put("content", content);
             textMessage.setText(textMap);
 
-            String getUserList = "https://qyapi.weixin.qq.com/cgi-bin/user/list?access_token=" + accessToken;
+            String accessToken = wechatService.getAccessToken(corpid, dbCorpSecret);
+            if (accessToken == null) {
+                returnMap.put("success", false);
+                returnMap.put("code ", "1102 ");
+                returnMap.put("message ", "Can not get access token from weichat server, Please call updateCorpDetail!");
+                return new Gson().toJson(returnMap).toString();
+            }
 
-            String getDepartList = "https://qyapi.weixin.qq.com/cgi-bin/department/list?access_token=" + accessToken;
-            String departList = UrlUtil.urlPost(getDepartList, "");
-            logger.info("sendTextMessage departList: " + departList);
-            if (StringUtils.isNotBlank(departList)) {
-                DepartmentMsg departmentMsg = GsonUtil.getInstance().fromJson(departList, DepartmentMsg.class);
-                if (departmentMsg != null) {
-                    List<DepartmentDetail> department = departmentMsg.getDepartment();
-                    for (DepartmentDetail item : department) {
-                        logger.info("id=" + item.getId() + ", name: " + item.getName());
+            List<DepartmentDetail> department = wechatService.getDepartmentList(accessToken);
+            if(department == null || department.isEmpty()) {
+                returnMap.put("success", false);
+                returnMap.put("code ", "1102 ");
+                returnMap.put("message ", "Can not find department by input toparty=" + toparty);
+                return new Gson().toJson(returnMap).toString();
+            }
 
-                        String getDepartmentUsers = getUserList + "&department_id=" + item.getId() + "&fetch_child=1&status=0";
-                        String departUserList = UrlUtil.urlPost(getDepartmentUsers, "");
-                        WechatUserMsg userMsg = GsonUtil.getInstance().fromJson(departUserList, WechatUserMsg.class);
-                        if(userMsg != null && userMsg.getErrcode() == 0 && userMsg.getUserlist() != null) {
-                            List<WechatUser> userList = userMsg.getUserlist();
-                            for(WechatUser depUser: userList) {
-                                String userId = depUser.getUserid();
-                                String userName = depUser.getName();
-                                logger.info("\tid=" + item.getId() + ", name: " + item.getName() + ", userId=" + userId + ", userName=" + userName);
-                            }
-                        }
+            for (DepartmentDetail item : department) {
+                logger.info("id=" + item.getId() + ", name: " + item.getName());
+                if (toparty.equalsIgnoreCase(item.getName())) {
+                    textMessage.setToparty(item.getId() + "");
+                    String mesgContent = GsonUtil.getInstance().toJson(textMessage);
+                    logger.info("sendTextMessage mesgContent: " + mesgContent);
 
-                        if (toparty.equalsIgnoreCase(item.getName())) {
-                            textMessage.setToparty(item.getId() + "");
-                            String mesgContent = GsonUtil.getInstance().toJson(textMessage);
-                            logger.info("sendTextMessage mesgContent: " + mesgContent);
-
-                            String textMessageUrl = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + accessToken;
-                            String returnMsg = UrlUtil.urlPost(textMessageUrl, mesgContent);
-                            logger.info("sendTextMessage returnMsg: " + returnMsg);
-                        }
-                    }
+                    String textMessageUrl = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + accessToken;
+                    String returnMsg = UrlUtil.urlPost(textMessageUrl, mesgContent);
+                    logger.info("sendTextMessage returnMsg: " + returnMsg);
                 }
             }
 
@@ -188,14 +173,14 @@ public class WeChatController {
         Map<String, Object> returnMap = new HashMap<String, Object>();
 
         GmsCorpDTO dbData = wechatService.findByCorpid(corpid);
-        if(dbData == null ) {
+        if (dbData == null) {
             returnMap.put("success", false);
             returnMap.put("code ", "1302 ");
             returnMap.put("message ", "Can not find corpid[" + corpid + "] in our database , Please call updateCorpDetail!");
             return new Gson().toJson(returnMap).toString();
         }
 
-        if(dbData.getCorpsecret() == null) {
+        if (dbData.getCorpsecret() == null) {
             returnMap.put("success", false);
             returnMap.put("code ", "1302 ");
             returnMap.put("message ", " corpsecret for [" + corpid + "]  is null , Please call updateCorpDetail!");
@@ -274,14 +259,14 @@ public class WeChatController {
         Map<String, Object> returnMap = new HashMap<String, Object>();
 
         GmsCorpDTO dbData = wechatService.findByCorpid(corpid);
-        if(dbData == null ) {
+        if (dbData == null) {
             returnMap.put("success", false);
             returnMap.put("code ", "1302 ");
             returnMap.put("message ", "Can not find corpid[" + corpid + "] in our database , Please call updateCorpDetail!");
             return new Gson().toJson(returnMap).toString();
         }
 
-        if(dbData.getCorpsecret() == null) {
+        if (dbData.getCorpsecret() == null) {
             returnMap.put("success", false);
             returnMap.put("code ", "1302 ");
             returnMap.put("message ", " corpsecret for [" + corpid + "]  is null , Please call updateCorpDetail!");
@@ -336,14 +321,14 @@ public class WeChatController {
         Map<String, Object> returnMap = new HashMap<String, Object>();
 
         GmsCorpDTO dbData = wechatService.findByCorpid(corpid);
-        if(dbData == null ) {
+        if (dbData == null) {
             returnMap.put("success", false);
             returnMap.put("code ", "1302 ");
             returnMap.put("message ", "Can not find corpid[" + corpid + "] in our database , Please call updateCorpDetail!");
             return new Gson().toJson(returnMap).toString();
         }
 
-        if(dbData.getCorpsecret() == null) {
+        if (dbData.getCorpsecret() == null) {
             returnMap.put("success", false);
             returnMap.put("code ", "1302 ");
             returnMap.put("message ", " corpsecret for [" + corpid + "]  is null , Please call updateCorpDetail!");
@@ -425,14 +410,14 @@ public class WeChatController {
         Map<String, Object> returnMap = new HashMap<String, Object>();
 
         GmsCorpDTO dbData = wechatService.findByCorpid(corpid);
-        if(dbData == null ) {
+        if (dbData == null) {
             returnMap.put("success", false);
             returnMap.put("code ", "1302 ");
             returnMap.put("message ", "Can not find corpid[" + corpid + "] in our database , Please call updateCorpDetail!");
             return new Gson().toJson(returnMap).toString();
         }
 
-        if(dbData.getCorpsecret() == null) {
+        if (dbData.getCorpsecret() == null) {
             returnMap.put("success", false);
             returnMap.put("code ", "1302 ");
             returnMap.put("message ", " corpsecret for [" + corpid + "]  is null , Please call updateCorpDetail!");
