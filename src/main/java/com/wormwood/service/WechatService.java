@@ -1,6 +1,8 @@
 package com.wormwood.service;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.gson.JsonObject;
 import com.wormwood.DTO.*;
 import com.wormwood.dao.WechatDao;
 import com.wormwood.util.GsonUtil;
@@ -9,8 +11,11 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * User: tangbin
@@ -18,9 +23,16 @@ import java.util.List;
  * T me: 8:35
  * Description: use wechat tables
  */
+@Service(value="wechatService")
 public class WechatService {
 
     private static Logger logger = LoggerFactory.getLogger(WechatService.class);
+
+    @Value("${conf.corp.id}")
+    private String corpid;
+
+    @Value("${conf.corp.secret}")
+    private String corpsecret;
 
     @Autowired
     private WechatDao wechatDao;
@@ -38,6 +50,12 @@ public class WechatService {
         wechatDao.updateCorp(gmsCorpDTO);
     }
 
+    /**
+     * Get all corp department
+     *
+     * @param accessToken
+     * @return
+     */
     public List<DepartmentDetail> getDepartmentList(String accessToken) {
         String getDepartList = "https://qyapi.weixin.qq.com/cgi-bin/department/list?access_token=" + accessToken;
         String departList = UrlUtil.urlPost(getDepartList, "");
@@ -55,6 +73,15 @@ public class WechatService {
         return null;
     }
 
+    /**
+     * get all corp user by department id
+     *
+     * @param accessToken
+     * @param department_id
+     * @param fetch_child
+     * @param status
+     * @return
+     */
     public List<WechatUser> getUserListByDepId(String accessToken, int department_id, String fetch_child, String status) {
         String getUserList = "https://qyapi.weixin.qq.com/cgi-bin/user/list?access_token=" + accessToken;
         String getDepartmentUsers = getUserList + "&department_id=" + department_id + "&fetch_child=" + fetch_child + "&status=" + status;
@@ -66,7 +93,8 @@ public class WechatService {
                 for (WechatUser depUser : userList) {
                     String userId = depUser.getUserid();
                     String userName = depUser.getName();
-                    logger.info("department_id=" + department_id + ", userId=" + userId + ", userName=" + userName);
+                    String weixinid = depUser.getWeixinid();
+                    logger.info("department_id=" + department_id + ", userId=" + userId + ", userName=" + userName + ", weixinid=" + weixinid);
                 }
                 return userList;
             }
@@ -74,9 +102,20 @@ public class WechatService {
         return null;
     }
 
+
+    /**
+     * get all corp user
+     *
+     * @param accessToken
+     * @return
+     */
     public List<WechatUser> getAllCorpUser(String accessToken) {
+        if (accessToken == null) {
+            accessToken = getAccessToken();
+        }
+
         List<DepartmentDetail> departmentList = getDepartmentList(accessToken);
-        if(departmentList == null || departmentList.isEmpty()) {
+        if (departmentList == null || departmentList.isEmpty()) {
             return null;
         }
 
@@ -84,13 +123,56 @@ public class WechatService {
         for (DepartmentDetail item : departmentList) {
             int department_id = item.getId();
             List<WechatUser> depUserList = getUserListByDepId(accessToken, department_id, "1", "0");
-            if(depUserList != null && !depUserList.isEmpty()) {
+            if (depUserList != null && !depUserList.isEmpty()) {
                 allCorpUser.addAll(depUserList);
             }
         }
         return allCorpUser;
     }
 
+    public List<WechatUser> getUserIdsByWechat(String weixinIds) {
+        if (weixinIds == null || StringUtils.isBlank(weixinIds)) {
+            return null;
+        }
 
+        List<WechatUser> resultList = Lists.newArrayList();
+
+        List<WechatUser> allCorpUser = getAllCorpUser(null);
+
+        Map<String, Boolean> helpMap = Maps.newHashMap();
+
+        String[] weixinIdArr = weixinIds.split("|");
+        for (String weixinId : weixinIdArr) {
+            helpMap.put(weixinId, Boolean.TRUE);
+        }
+
+        for(WechatUser user:allCorpUser) {
+            String weixinId = user.getWeixinid();
+            if(helpMap.get(weixinId) != null) {
+                resultList.add(user);
+            }
+        }
+        return null;
+    }
+
+
+    public String getAccessToken() {
+        String url = "https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=" + corpid + "&corpsecret=" + corpsecret;
+        String tokenJsonStr = UrlUtil.urlGet(url);
+        JsonObject jsonObject = GsonUtil.getInstance().fromJson(tokenJsonStr, JsonObject.class);
+        if (jsonObject != null) {
+            return jsonObject.get("access_token").getAsString();
+        }
+        return null;
+    }
+
+    public static void main(String args[]) {
+        try {
+            WechatService wechatService = new WechatService();
+            wechatService.getAllCorpUser(null);
+        } catch (Exception ex) {
+            ex.printStackTrace();;
+        }
+    }
 
 }

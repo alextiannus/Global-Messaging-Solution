@@ -22,6 +22,7 @@
         <java.version>1.8</java.version>
         <tk.mybatis.version>1.1.0</tk.mybatis.version>
         <tk.mybatis.mapper.version>3.4.0</tk.mybatis.mapper.version>
+        <spring-version>4.2.3.RELEASE</spring-version>
     </properties>
 
     <repositories>
@@ -136,6 +137,19 @@
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.3.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>${spring-version}</version>
+            <!--<scope>provided</scope>-->
         </dependency>
 
     </dependencies>

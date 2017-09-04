@@ -275,7 +275,7 @@ public class UrlUtil {
         return mediaId;
     }
 
-    public static String ddgetAccessToken() {
+    public static String getAccessToken() {
         String url = ACCESS_TOKEN_URL.replace("APPID", CORPID).replace("APPSECRET", APPSECRET);
         String tokenJsonStr = urlGet(url);
         JsonObject jsonObject = GsonUtil.getInstance().fromJson(tokenJsonStr, JsonObject.class);

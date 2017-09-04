@@ -16,7 +16,6 @@ import com.wormwood.response.Response;
 import com.wormwood.result.ResultEnum;
 import com.wormwood.service.WechatService;
 import com.wormwood.util.GsonUtil;
-import com.wormwood.util.UrlUtil;
 import com.wormwood.vo.WechatToken;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
