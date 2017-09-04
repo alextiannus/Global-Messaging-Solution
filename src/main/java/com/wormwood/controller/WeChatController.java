@@ -171,6 +171,10 @@ public class WeChatController {
                 return new Gson().toJson(returnMap).toString();
             }
 
+            if(textMessage.getToparty()  == null) {
+                textMessage.setToparty("");
+            }
+
             String mesgContent = GsonUtil.getInstance().toJson(textMessage);
             logger.info("sendTextMessage mesgContent: " + mesgContent);
             String textMessageUrl = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + accessToken;
