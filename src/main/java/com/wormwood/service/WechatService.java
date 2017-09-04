@@ -94,7 +94,7 @@ public class WechatService {
                     String userId = depUser.getUserid();
                     String userName = depUser.getName();
                     String weixinid = depUser.getWeixinid();
-                    logger.info("department_id=" + department_id + ", userId=" + userId + ", userName=" + userName + ", weixinid=" + weixinid);
+                    logger.info("\tdepartment_id=" + department_id + ", userId=" + userId + ", userName=" + userName + ", weixinid=" + weixinid);
                 }
                 return userList;
             }

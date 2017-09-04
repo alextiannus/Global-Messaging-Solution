@@ -1,4 +1,4 @@
-package com.wormwood;
+package com.wormwood.gmstest;
 
 import com.google.common.collect.Maps;
 
