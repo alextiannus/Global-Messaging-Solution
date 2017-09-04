@@ -55,7 +55,6 @@ public class WeChatController {
 
     @RequestMapping("/sendMsgPage")
     public String toSendMsgPage() {
-        logger.info("toSendMsgPage wechatService: " + wechatService.findByCorpid(corpid));
         return "wechat/sendMsgPage";
     }
 
@@ -114,11 +113,13 @@ public class WeChatController {
             String dbCorpSecret = dbData.getCorpsecret();
             int dbAgentId = dbData.getAgentid();
 
-            logger.info("sendTextMessage corpid:  " + corpid + ", dbCorpSecret: " + dbCorpSecret + ", dbAgentId: " + dbAgentId + ", wechatClient:" + wechatClient);
+            logger.info("sendTextMessage corpid:  " + corpid + ", dbCorpSecret: " + dbCorpSecret + ", dbAgentId: " + dbAgentId);
             logger.info("sendTextMessage touser: " + touser + ", toparty: " + toparty + ", content: " + content + ", safe=" + safe);
 
             TextMessage textMessage = new TextMessage();
-            textMessage.setTouser(touser);
+            if (touser != null && !StringUtils.isBlank(touser)) {
+                textMessage.setTouser(touser);
+            }
             textMessage.setTotag(null);
             textMessage.setAgentid(dbAgentId);
             Map<String, String> textMap = Maps.newHashMap();
@@ -134,25 +135,48 @@ public class WeChatController {
             }
 
             List<DepartmentDetail> department = wechatService.getDepartmentList(accessToken);
-            if(department == null || department.isEmpty()) {
+            if (department == null || department.isEmpty()) {
                 returnMap.put("success", false);
                 returnMap.put("code ", "1102 ");
                 returnMap.put("message ", "Can not find department by input toparty=" + toparty);
                 return new Gson().toJson(returnMap).toString();
             }
 
+            List<String> toPartList = Lists.newArrayList();
             for (DepartmentDetail item : department) {
                 logger.info("id=" + item.getId() + ", name: " + item.getName());
                 if (toparty.equalsIgnoreCase(item.getName())) {
-                    textMessage.setToparty(item.getId() + "");
-                    String mesgContent = GsonUtil.getInstance().toJson(textMessage);
-                    logger.info("sendTextMessage mesgContent: " + mesgContent);
-
-                    String textMessageUrl = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + accessToken;
-                    String returnMsg = UrlUtil.urlPost(textMessageUrl, mesgContent);
-                    logger.info("sendTextMessage returnMsg: " + returnMsg);
+                    toPartList.add(item.getId() + "");
                 }
             }
+
+            StringBuffer topartVal = new StringBuffer();
+            if (toPartList != null && !toPartList.isEmpty()) {
+                for (int i = 0, j = toPartList.size(); i < j; i++) {
+                    if (i != j - 1) {
+                        topartVal.append(toPartList.get(i)).append("|");
+                    } else {
+                        topartVal.append(toPartList.get(i));
+                    }
+                }
+                if (topartVal.length() > 0) {
+                    textMessage.setToparty(topartVal.toString());
+                }
+            }
+
+            if (textMessage.getTouser() == null && textMessage.getToparty() == null) {
+                returnMap.put("success", false);
+                returnMap.put("code ", "1102 ");
+                returnMap.put("message ", " Please pass correct touser and topart!");
+                return new Gson().toJson(returnMap).toString();
+            }
+
+            String mesgContent = GsonUtil.getInstance().toJson(textMessage);
+            logger.info("sendTextMessage mesgContent: " + mesgContent);
+            String textMessageUrl = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + accessToken;
+            String returnMsg = UrlUtil.urlPost(textMessageUrl, mesgContent);
+            logger.info("sendTextMessage returnMsg: " + returnMsg);
+
 
             returnMap.put("success", true);
             returnMap.put("code ", "1101 ");
