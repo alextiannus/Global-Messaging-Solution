@@ -31,7 +31,8 @@ public class WechatServiceTester {
 
     @Test
     public void getDepartmentIdsByNames() {
-        wechatService.getDepartmentIdsByNames(null, "globalORETest");
+        String result = wechatService.getDepartmentIdsByNames(null, "globalORETest | globalORETest");
+        System.out.println("----------------result:" + result);
     }
 
 }

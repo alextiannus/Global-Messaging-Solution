@@ -112,18 +112,20 @@ public class WechatService {
             return null;
         }
 
-        String[] depNameArr = inputDepNames.split("|");
+        String[] depNameArr = inputDepNames.split("[|]");
         List<String> toPartList = Lists.newArrayList();
 
         for (int i = 0, j = depNameArr.length; i < j; i++) {
-            String depName = depNameArr[i];
+            String depName = depNameArr[i].trim();
             for (DepartmentDetail item : depList) {
+                String depId = item.getId() + "";
                 logger.info("id=" + item.getId() + ", name: " + item.getName() + ",  inputNameDepName: " + depName);
-                if (depName.equalsIgnoreCase(item.getName())) {
-                    toPartList.add(item.getId() + "");
+                if (depName.equalsIgnoreCase(item.getName()) && !toPartList.contains(depId)) {
+                    toPartList.add(depId);
                 }
             }
         }
+        logger.info("toPartList: " + toPartList);
         StringBuffer topartVal = new StringBuffer();
         if (toPartList != null && !toPartList.isEmpty()) {
             for (int i = 0, j = toPartList.size(); i < j; i++) {
