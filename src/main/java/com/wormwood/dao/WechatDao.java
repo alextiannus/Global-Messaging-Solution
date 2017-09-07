@@ -31,7 +31,7 @@ public interface WechatDao {
     @Insert("insert into gms_corp(corpid, corpsecret, agentid, crt_on, crt_by) values(#{corpid}, #{corpsecret}, #{agentid}, #{crtDate} ,#{crtBy}) ")
     public void insertNewCorp(GmsCorpDTO gmsCorpDTO);
 
-    @Update("update gms_corp  set corpsecret=#{corpsecret},  agentid=#{agentid},  upd_on=#{updDate}, upd_by=#{udpBy}")
+    @Update("update gms_corp  set corpsecret=#{corpsecret},  agentid=#{agentid},  upd_on=#{updDate}, upd_by=#{udpBy} where corpid=#{corpid} ")
     public void updateCorp(GmsCorpDTO gmsCorpDTO);
 
 }
