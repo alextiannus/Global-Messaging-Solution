@@ -29,6 +29,11 @@ public class WechatServiceTester {
         wechatService.getAllCorpUser(null);
     }
 
+    @Test
+    public void getDepartmentIdsByNames() {
+        wechatService.getDepartmentIdsByNames(null, "globalORETest");
+    }
+
 }
 
 

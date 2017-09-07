@@ -51,6 +51,23 @@ public class WechatService {
     }
 
     /**
+     * Get user accessToken
+     *
+     * @param inputCorpid
+     * @param inputCorpsecret
+     * @return
+     */
+    public String getAccessToken(String inputCorpid, String inputCorpsecret) {
+        String url = "https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=" + inputCorpid + "&corpsecret=" + inputCorpsecret;
+        String tokenJsonStr = UrlUtil.urlGet(url);
+        JsonObject jsonObject = GsonUtil.getInstance().fromJson(tokenJsonStr, JsonObject.class);
+        if (jsonObject != null) {
+            return jsonObject.get("access_token").getAsString();
+        }
+        return null;
+    }
+
+    /**
      * Get all corp department
      *
      * @param accessToken
@@ -67,6 +84,57 @@ public class WechatService {
                     logger.info("id=" + item.getId() + ", name: " + item.getName());
                 }
                 return department;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get wechat department ids by input department names
+     *
+     * @param accessToken
+     * @param inputDepNames
+     * @return
+     */
+    public String getDepartmentIdsByNames(String accessToken, String inputDepNames) {
+        if (StringUtils.isBlank(inputDepNames)) {
+            logger.info("inputDepNames in blank!");
+            return null;
+        }
+
+        if (accessToken == null) {
+            accessToken = getAccessToken(corpid, corpsecret);
+        }
+
+        List<DepartmentDetail> depList = getDepartmentList(accessToken);
+        if (depList == null || depList.isEmpty()) {
+            logger.info("depList in blank!");
+            return null;
+        }
+
+        String[] depNameArr = inputDepNames.split("|");
+        List<String> toPartList = Lists.newArrayList();
+
+        for (int i = 0, j = depNameArr.length; i < j; i++) {
+            String depName = depNameArr[i];
+            for (DepartmentDetail item : depList) {
+                logger.info("id=" + item.getId() + ", name: " + item.getName() + ",  inputNameDepName: " + depName);
+                if (depName.equalsIgnoreCase(item.getName())) {
+                    toPartList.add(item.getId() + "");
+                }
+            }
+        }
+        StringBuffer topartVal = new StringBuffer();
+        if (toPartList != null && !toPartList.isEmpty()) {
+            for (int i = 0, j = toPartList.size(); i < j; i++) {
+                if (i != j - 1) {
+                    topartVal.append(toPartList.get(i)).append("|");
+                } else {
+                    topartVal.append(toPartList.get(i));
+                }
+            }
+            if (topartVal.length() > 0) {
+                return topartVal.toString();
             }
         }
         return null;
@@ -150,23 +218,6 @@ public class WechatService {
             if (helpMap.get(weixinId) != null) {
                 resultList.add(user);
             }
-        }
-        return null;
-    }
-
-    /**
-     * Get user accessToken
-     *
-     * @param inputCorpid
-     * @param inputCorpsecret
-     * @return
-     */
-    public String getAccessToken(String inputCorpid, String inputCorpsecret) {
-        String url = "https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=" + inputCorpid + "&corpsecret=" + inputCorpsecret;
-        String tokenJsonStr = UrlUtil.urlGet(url);
-        JsonObject jsonObject = GsonUtil.getInstance().fromJson(tokenJsonStr, JsonObject.class);
-        if (jsonObject != null) {
-            return jsonObject.get("access_token").getAsString();
         }
         return null;
     }
