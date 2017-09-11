@@ -24,9 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -77,11 +75,28 @@ public class WeChatController {
         }
     }
 
-    @RequestMapping("/sendTextMessage")
+    @RequestMapping(value = "/sendTextMessage", method = RequestMethod.POST)
     public @ResponseBody
-    String sendTextMessage(HttpServletRequest request, String corpid, String touser, String toparty, String content, String safe) throws Exception {
+    String sendTextMessage(@RequestBody Map<String, String> bodyContent, HttpServletRequest request, String corpid, String touser, String toparty, String content, String safe) throws Exception {
+
 
         Map<String, Object> returnMap = new HashMap<String, Object>();
+        System.out.println("bodyContent: " + bodyContent);
+        if (corpid == null) {
+            corpid = bodyContent.get("corpid");
+        }
+        if (touser == null) {
+            touser = bodyContent.get("touser");
+        }
+        if (toparty == null) {
+            toparty = bodyContent.get("toparty");
+        }
+        if (content == null) {
+            content = bodyContent.get("content");
+        }
+        if (safe == null) {
+            safe = bodyContent.get("safe    ");
+        }
 
         GmsCorpDTO dbData = wechatService.findByCorpid(corpid);
         if (dbData == null) {
@@ -158,7 +173,7 @@ public class WeChatController {
         return new Gson().toJson(returnMap).toString();
     }
 
-    @RequestMapping("/sendImageMessage")
+    @RequestMapping(value = "/sendImageMessage", method = RequestMethod.POST)
     public @ResponseBody
     String sendImageMessage(@RequestParam(value = "file", required = false) MultipartFile image, String corpid, String touser, String toparty, HttpServletRequest request) throws Exception {
         Map<String, Object> returnMap = new HashMap<String, Object>();
@@ -240,7 +255,7 @@ public class WeChatController {
         return new Gson().toJson(returnMap).toString();
     }
 
-    @RequestMapping("/sendFileMessage")
+    @RequestMapping(value="/sendFileMessage", method = RequestMethod.POST)
     public @ResponseBody
     String sendFileMessage(@RequestParam(value = "file", required = false) MultipartFile file, String corpid, String touser, String toparty, HttpServletRequest request) throws Exception {
         Map<String, Object> returnMap = new HashMap<String, Object>();
@@ -317,7 +332,7 @@ public class WeChatController {
         return new Gson().toJson(returnMap).toString();
     }
 
-    @RequestMapping("/sendNewsMessage")
+    @RequestMapping(value = "/sendNewsMessage", method = RequestMethod.POST)
     public @ResponseBody
     String sendNewsMessage(String corpid, String touser, String toparty, HttpServletRequest request) throws Exception {
         Map<String, Object> returnMap = new HashMap<String, Object>();
@@ -413,7 +428,7 @@ public class WeChatController {
     }
 
 
-    @RequestMapping("/sendMpnewsMessage")
+    @RequestMapping(value = "/sendMpnewsMessage", method = RequestMethod.POST)
     public @ResponseBody
     String sendMpnewsMessage(@RequestParam(value = "file", required = false) MultipartFile file, String corpid, String touser, String toparty, HttpServletRequest request) throws Exception {
         Map<String, Object> returnMap = new HashMap<String, Object>();

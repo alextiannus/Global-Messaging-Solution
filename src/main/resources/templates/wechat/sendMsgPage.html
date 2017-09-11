@@ -6,12 +6,31 @@
     <meta charset="utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-
+    <script src="https://apps.bdimg.com/libs/jquery/1.10.2/jquery.min.js"></script>
     <title>Send WeChat Message</title>
+
+
+
+
 </head>
 
 <body class="nav-md">
 <div layout:fragment="content">
+
+    <script>
+        function sendAjaxRequest() {
+            var data={"corpid":"wx3a42b774b7b91ccf","touser":"TangBin", "content": "Message #0"};
+            $.ajax({
+                type:"POST",
+                url:"/wechat/sendTextMessage",
+                dataType:"json",
+                contentType:"application/json",
+                data:JSON.stringify(data),
+                success:function(data){
+                }
+            });
+        }
+    </script>
 
     <div class="right_col" role="main">
         <div class="row">
@@ -152,10 +171,33 @@
                 </div>
             </div>
 
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="x_panel">
+                    <div class="x_title row">
+                        <h2>Send Ajax Request</h2>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+                        <form action="" method="post" enctype="multipart/form-data">
+                            <input type="file" name="file"/>
+                            <button onclick="sendAjaxRequest()" class="btn btn-success">Submit
+                            </button>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
     </div>
 </div>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        alert('aaabbbcc');
+    });
+</script>
 
 </body>
 </html>
