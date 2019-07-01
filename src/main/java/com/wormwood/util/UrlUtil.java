@@ -1,6 +1,7 @@
 package com.wormwood.util;
 
 import com.google.gson.JsonObject;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +21,8 @@ import java.security.NoSuchProviderException;
  */
 @Component
 public class UrlUtil {
+
+    private static Logger logger = LoggerFactory.getLogger(UrlUtil.class);
 
     private static String CORPID;    // = "wx3a42b774b7b91ccf";
     private static String APPSECRET;// = "tpfikag8WOgdhafho3-cEgqJVQwTN3daf-u9182mUbVT4H-uHsTqYUye7uk6Acnr";
@@ -67,7 +70,9 @@ public class UrlUtil {
             log.error(e.toString());
         } finally {
             try {
-                in.close();
+                if (in != null) {
+                    in.close();
+                }
             } catch (IOException e) {
                 log.error(e.toString());
             }
@@ -104,6 +109,10 @@ public class UrlUtil {
             out.close();
         } catch (Exception e) {
             log.error(e.toString());
+            e.printStackTrace();
+        } finally {
+            IOUtils.closeQuietly(out);
+            IOUtils.closeQuietly(in);
         }
         log.debug("------json post result:{}", response);
         return response.toString();

@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -36,6 +37,8 @@ public class WechatService {
 
     @Autowired
     private WechatDao wechatDao;
+
+    private static Date expireDate = null;
 
     public GmsCorpDTO findByCorpid(String corpid) {
         logger.info("findByCorpid, wechatDao: " + wechatDao + ",  corpid: " + corpid);
